@@ -6,12 +6,11 @@ import { GUI } from 'dat.gui'
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
 
-const light = new THREE.PointLight(0xffffff, 2)
-light.position.set(10, 10, 10)
+const light = new THREE.DirectionalLight()
 scene.add(light)
-const light2 = new THREE.PointLight(0xffffff, 2)
-light2.position.set(-10, -7, 17)
-scene.add(light2)
+
+const helper = new THREE.DirectionalLightHelper(light)
+scene.add(helper)
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -19,7 +18,7 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 )
-camera.position.z = 3
+camera.position.z = 7
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -27,40 +26,54 @@ document.body.appendChild(renderer.domElement)
 
 new OrbitControls(camera, renderer.domElement)
 
-const boxGeometry = new THREE.BoxGeometry()
-const sphereGeometry = new THREE.SphereGeometry()
-const icosahedronGeometry = new THREE.IcosahedronGeometry(1, 0)
-const planeGeometry = new THREE.PlaneGeometry()
-const torusKnotGeometry = new THREE.TorusKnotGeometry()
+// const planeGeometry = new THREE.PlaneGeometry(20, 10)//, 360, 180)
+// const plane = new THREE.Mesh(planeGeometry, new THREE.MeshPhongMaterial())
+// plane.rotateX(-Math.PI / 2)
+// //plane.position.y = -1.75
+// scene.add(plane)
 
-const material = new THREE.MeshPhongMaterial()
+const torusGeometry = [
+    new THREE.TorusGeometry(),
+    new THREE.TorusGeometry(),
+    new THREE.TorusGeometry(),
+    new THREE.TorusGeometry(),
+    new THREE.TorusGeometry(),
+]
 
-// const texture = new THREE.TextureLoader().load("img/grid.png")
-// material.map = texture
-const envTexture = new THREE.CubeTextureLoader().load(["img/px_50.png", "img/nx_50.png", "img/py_50.png", "img/ny_50.png", "img/pz_50.png", "img/nz_50.png"])
-envTexture.mapping = THREE.CubeReflectionMapping
-// envTexture.mapping = THREE.CubeRefractionMapping
-material.envMap = envTexture
+const material = [
+    new THREE.MeshBasicMaterial(),
+    new THREE.MeshLambertMaterial(),
+    new THREE.MeshPhongMaterial(),
+    new THREE.MeshPhysicalMaterial({}),
+    new THREE.MeshToonMaterial(),
+]
 
-const cube = new THREE.Mesh(boxGeometry, material)
-cube.position.x = 5
-scene.add(cube)
+const torus = [
+    new THREE.Mesh(torusGeometry[0], material[0]),
+    new THREE.Mesh(torusGeometry[1], material[1]),
+    new THREE.Mesh(torusGeometry[2], material[2]),
+    new THREE.Mesh(torusGeometry[3], material[3]),
+    new THREE.Mesh(torusGeometry[4], material[4]),
+]
 
-const sphere = new THREE.Mesh(sphereGeometry, material)
-sphere.position.x = 3
-scene.add(sphere)
+const texture = new THREE.TextureLoader().load('img/grid.png')
+material[0].map = texture
+material[1].map = texture
+material[2].map = texture
+material[3].map = texture
+material[4].map = texture
 
-const icosahedron = new THREE.Mesh(icosahedronGeometry, material)
-icosahedron.position.x = 0
-scene.add(icosahedron)
+torus[0].position.x = -8
+torus[1].position.x = -4
+torus[2].position.x = 0
+torus[3].position.x = 4
+torus[4].position.x = 8
 
-const plane = new THREE.Mesh(planeGeometry, material)
-plane.position.x = -2
-scene.add(plane)
-
-const torusKnot = new THREE.Mesh(torusKnotGeometry, material)
-torusKnot.position.x = -5
-scene.add(torusKnot)
+scene.add(torus[0])
+scene.add(torus[1])
+scene.add(torus[2])
+scene.add(torus[3])
+scene.add(torus[4])
 
 window.addEventListener('resize', onWindowResize, false)
 function onWindowResize() {
@@ -73,71 +86,44 @@ function onWindowResize() {
 const stats = Stats()
 document.body.appendChild(stats.dom)
 
-const options = {
-    side: {
-        FrontSide: THREE.FrontSide,
-        BackSide: THREE.BackSide,
-        DoubleSide: THREE.DoubleSide,
-    },
-    combine: {
-        MultiplyOperation: THREE.MultiplyOperation,
-        MixOperation: THREE.MixOperation,
-        AddOperation: THREE.AddOperation,
-    },
+const data = {
+    color: light.color.getHex(),
+    mapsEnabled: true,
 }
 
 const gui = new GUI()
-const materialFolder = gui.addFolder('THREE.Material')
-materialFolder.add(material, 'transparent')
-materialFolder.add(material, 'opacity', 0, 1, 0.01)
-materialFolder.add(material, 'depthTest')
-materialFolder.add(material, 'depthWrite')
-materialFolder
-    .add(material, 'alphaTest', 0, 1, 0.01)
-    .onChange(() => updateMaterial())
-materialFolder.add(material, 'visible')
-materialFolder
-    .add(material, 'side', options.side)
-    .onChange(() => updateMaterial())
-materialFolder.open()
-
-const data = {
-    color: material.color.getHex(),
-    emissive: material.emissive.getHex(),
-    specular: material.specular.getHex()
-}
-
-const meshPhongMaterialFolder = gui.addFolder('THREE.MeshPhongMaterial')
-meshPhongMaterialFolder.addColor(data, 'color').onChange(() => {
-    material.color.setHex(Number(data.color.toString().replace('#', '0x')))
+const lightFolder = gui.addFolder('THREE.Light')
+lightFolder.addColor(data, 'color').onChange(() => {
+    light.color.setHex(Number(data.color.toString().replace('#', '0x')))
 })
-meshPhongMaterialFolder.addColor(data, 'emissive').onChange(() => {
-    material.emissive.setHex(
-        Number(data.emissive.toString().replace('#', '0x'))
-    )
-})
-meshPhongMaterialFolder.addColor(data, 'specular').onChange(() => { material.specular.setHex(Number(data.specular.toString().replace('#', '0x'))) });
-meshPhongMaterialFolder.add(material, 'shininess', 0, 2048);
-meshPhongMaterialFolder.add(material, 'wireframe')
-meshPhongMaterialFolder.add(material, 'wireframeLinewidth', 0, 10)
-meshPhongMaterialFolder
-    .add(material, 'flatShading')
-    .onChange(() => updateMaterial())
-meshPhongMaterialFolder
-    .add(material, 'combine', options.combine)
-    .onChange(() => updateMaterial())
-meshPhongMaterialFolder.add(material, 'reflectivity', 0, 1)
-meshPhongMaterialFolder.add(material, 'refractionRatio', 0, 1)
-meshPhongMaterialFolder.open()
+lightFolder.add(light, 'intensity', 0, 1, 0.01)
 
-function updateMaterial() {
-    material.side = Number(material.side)
-    material.combine = Number(material.combine)
-    material.needsUpdate = true
-}
+const directionalLightFolder = gui.addFolder('THREE.DirectionalLight')
+directionalLightFolder.add(light.position, "x", -100, 100, 0.01)
+directionalLightFolder.add(light.position, "y", -100, 100, 0.01)
+directionalLightFolder.add(light.position, "z", -100, 100, 0.01)
+directionalLightFolder.open()
+
+const meshesFolder = gui.addFolder('Meshes')
+meshesFolder.add(data, 'mapsEnabled').onChange(() => {
+    material.forEach((m) => {
+        if (data.mapsEnabled) {
+            m.map = texture
+        } else {
+            m.map = null
+        }
+        m.needsUpdate = true
+    })
+})
 
 function animate() {
     requestAnimationFrame(animate)
+
+    //helper.update()
+
+    torus.forEach((t) => {
+        t.rotation.y += 0.01
+    })
 
     render()
 
