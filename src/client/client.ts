@@ -1,16 +1,9 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
-import { GUI } from 'dat.gui'
 
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
-
-const light = new THREE.DirectionalLight()
-scene.add(light)
-
-const helper = new THREE.DirectionalLightHelper(light)
-scene.add(helper)
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -18,62 +11,87 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 )
-camera.position.z = 7
+camera.position.y = 1
+camera.position.z = 2
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
-new OrbitControls(camera, renderer.domElement)
+const menuPanel = document.getElementById('menuPanel') as HTMLDivElement
+// const startButton = document.getElementById('startButton') as HTMLInputElement
+// startButton.addEventListener(
+//     'click',
+//     function () {
+//         controls.lock()
+//     },
+//     false
+// )
 
-// const planeGeometry = new THREE.PlaneGeometry(20, 10)//, 360, 180)
-// const plane = new THREE.Mesh(planeGeometry, new THREE.MeshPhongMaterial())
-// plane.rotateX(-Math.PI / 2)
-// //plane.position.y = -1.75
-// scene.add(plane)
+const controls = new PointerLockControls(camera, renderer.domElement)
+// controls.addEventListener('change', () => console.log("Controls Change"))
+// controls.addEventListener('lock', () => menuPanel.style.display = 'none')
+// controls.addEventListener('unlock', () => menuPanel.style.display = 'block')
 
-const torusGeometry = [
-    new THREE.TorusGeometry(),
-    new THREE.TorusGeometry(),
-    new THREE.TorusGeometry(),
-    new THREE.TorusGeometry(),
-    new THREE.TorusGeometry(),
-]
+const planeGeometry = new THREE.PlaneGeometry(100, 100, 50, 50)
+const material = new THREE.MeshBasicMaterial({
+    color: 0x00ff00,
+    wireframe: true,
+})
+const plane = new THREE.Mesh(planeGeometry, material)
+plane.rotateX(-Math.PI / 2)
+scene.add(plane)
 
-const material = [
-    new THREE.MeshBasicMaterial(),
-    new THREE.MeshLambertMaterial(),
-    new THREE.MeshPhongMaterial(),
-    new THREE.MeshPhysicalMaterial({}),
-    new THREE.MeshToonMaterial(),
-]
+const cubes: THREE.Mesh[] = []
+for (let i = 0; i < 100; i++) {
+    const geo = new THREE.BoxGeometry(
+        Math.random() * 4,
+        Math.random() * 16,
+        Math.random() * 4
+    )
+    const mat = new THREE.MeshBasicMaterial({ wireframe: true })
+    switch (i % 3) {
+        case 0:
+            mat.color = new THREE.Color(0xff0000)
+            break
+        case 1:
+            mat.color = new THREE.Color(0xffff00)
+            break
+        case 2:
+            mat.color = new THREE.Color(0x0000ff)
+            break
+    }
+    const cube = new THREE.Mesh(geo, mat)
+    cubes.push(cube)
+}
+cubes.forEach((c) => {
+    c.position.x = Math.random() * 100 - 50
+    c.position.z = Math.random() * 100 - 50
+    c.geometry.computeBoundingBox()
+    c.position.y =
+        ((c.geometry.boundingBox as THREE.Box3).max.y -
+            (c.geometry.boundingBox as THREE.Box3).min.y) /
+        2
+    scene.add(c)
+})
 
-const torus = [
-    new THREE.Mesh(torusGeometry[0], material[0]),
-    new THREE.Mesh(torusGeometry[1], material[1]),
-    new THREE.Mesh(torusGeometry[2], material[2]),
-    new THREE.Mesh(torusGeometry[3], material[3]),
-    new THREE.Mesh(torusGeometry[4], material[4]),
-]
-
-const texture = new THREE.TextureLoader().load('img/grid.png')
-material[0].map = texture
-material[1].map = texture
-material[2].map = texture
-material[3].map = texture
-material[4].map = texture
-
-torus[0].position.x = -8
-torus[1].position.x = -4
-torus[2].position.x = 0
-torus[3].position.x = 4
-torus[4].position.x = 8
-
-scene.add(torus[0])
-scene.add(torus[1])
-scene.add(torus[2])
-scene.add(torus[3])
-scene.add(torus[4])
+// const onKeyDown = function (event: KeyboardEvent) {
+//     switch (event.code) {
+//         case "KeyW":
+//             controls.moveForward(.25)
+//             break
+//         case "KeyA":
+//             controls.moveRight(-.25)
+//             break
+//         case "KeyS":
+//             controls.moveForward(-.25)
+//             break
+//         case "KeyD":
+//             controls.moveRight(.25)
+//             break
+//     }
+// }
+// document.addEventListener('keydown', onKeyDown, false)
 
 window.addEventListener('resize', onWindowResize, false)
 function onWindowResize() {
@@ -86,44 +104,10 @@ function onWindowResize() {
 const stats = Stats()
 document.body.appendChild(stats.dom)
 
-const data = {
-    color: light.color.getHex(),
-    mapsEnabled: true,
-}
-
-const gui = new GUI()
-const lightFolder = gui.addFolder('THREE.Light')
-lightFolder.addColor(data, 'color').onChange(() => {
-    light.color.setHex(Number(data.color.toString().replace('#', '0x')))
-})
-lightFolder.add(light, 'intensity', 0, 1, 0.01)
-
-const directionalLightFolder = gui.addFolder('THREE.DirectionalLight')
-directionalLightFolder.add(light.position, "x", -100, 100, 0.01)
-directionalLightFolder.add(light.position, "y", -100, 100, 0.01)
-directionalLightFolder.add(light.position, "z", -100, 100, 0.01)
-directionalLightFolder.open()
-
-const meshesFolder = gui.addFolder('Meshes')
-meshesFolder.add(data, 'mapsEnabled').onChange(() => {
-    material.forEach((m) => {
-        if (data.mapsEnabled) {
-            m.map = texture
-        } else {
-            m.map = null
-        }
-        m.needsUpdate = true
-    })
-})
-
 function animate() {
     requestAnimationFrame(animate)
 
-    //helper.update()
-
-    torus.forEach((t) => {
-        t.rotation.y += 0.01
-    })
+    //controls.update()
 
     render()
 
