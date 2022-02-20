@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { DragControls } from 'three/examples/jsm/controls/DragControls'
 
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
@@ -11,6 +14,11 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 )
+
+const light = new THREE.SpotLight()
+light.position.set(2.5, 7.5, 15)
+scene.add(light)
+
 camera.position.y = 1
 camera.position.z = 2
 
@@ -19,19 +27,19 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
 const menuPanel = document.getElementById('menuPanel') as HTMLDivElement
-// const startButton = document.getElementById('startButton') as HTMLInputElement
-// startButton.addEventListener(
-//     'click',
-//     function () {
-//         controls.lock()
-//     },
-//     false
-// )
+const startButton = document.getElementById('startButton') as HTMLInputElement
+startButton.addEventListener(
+    'click',
+    function () {
+        controls.lock()
+    },
+    false
+)
 
 const controls = new PointerLockControls(camera, renderer.domElement)
-// controls.addEventListener('change', () => console.log("Controls Change"))
-// controls.addEventListener('lock', () => menuPanel.style.display = 'none')
-// controls.addEventListener('unlock', () => menuPanel.style.display = 'block')
+controls.addEventListener('change', () => console.log("Controls Change"))
+controls.addEventListener('lock', () => (menuPanel.style.display = 'none'))
+controls.addEventListener('unlock', () => (menuPanel.style.display = 'block'))
 
 const planeGeometry = new THREE.PlaneGeometry(100, 100, 50, 50)
 const material = new THREE.MeshBasicMaterial({
@@ -55,7 +63,7 @@ for (let i = 0; i < 100; i++) {
             mat.color = new THREE.Color(0xff0000)
             break
         case 1:
-            mat.color = new THREE.Color(0xffff00)
+            mat.color = new THREE.Color(0x6a0dad)
             break
         case 2:
             mat.color = new THREE.Color(0x0000ff)
@@ -75,23 +83,59 @@ cubes.forEach((c) => {
     scene.add(c)
 })
 
-// const onKeyDown = function (event: KeyboardEvent) {
-//     switch (event.code) {
-//         case "KeyW":
-//             controls.moveForward(.25)
-//             break
-//         case "KeyA":
-//             controls.moveRight(-.25)
-//             break
-//         case "KeyS":
-//             controls.moveForward(-.25)
-//             break
-//         case "KeyD":
-//             controls.moveRight(.25)
-//             break
+// const objLoader = new OBJLoader()
+// objLoader.load(
+//     'models/web_head_smaller_2.obj',
+//     (object) => {
+//         (object.children[0] as THREE.Mesh).material = material
+//         object.traverse(function (child) {
+//             if ((child as THREE.Mesh).isMesh) {
+//                 (child as THREE.Mesh).material = material
+//             }
+//         })
+        
+//         scene.add(object)
+//         scene.updateMatrixWorld(true)
+//         object.matrixWorld.setPosition(new THREE.Vector3(100, 1000, 100))
+//         scene.updateMatrix()
+//     },
+//     (xhr) => {
+//         console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+//     },
+//     (error) => {
+//         console.log(error)
 //     }
-// }
-// document.addEventListener('keydown', onKeyDown, false)
+// )
+
+// const orbitControls = new OrbitControls(camera, renderer.domElement)
+
+// const dragControls = new DragControls([objLoader], camera, renderer.domElement)
+// dragControls.addEventListener('dragstart', function (event) {
+//     orbitControls.enabled = false
+//     event.object.material.opacity = 0.33
+// })
+// dragControls.addEventListener('dragend', function (event) {
+//     orbitControls.enabled = true
+//     event.object.material.opacity = 1
+// })
+
+const onKeyDown = function (event: KeyboardEvent) {
+    switch (event.code) {
+        case 'KeyW':
+            controls.moveForward(0.25)
+            break
+        case 'KeyA':
+            controls.moveRight(-0.25)
+            break
+        case 'KeyS':
+            controls.moveForward(-0.25)
+            break
+        case 'KeyD':
+            controls.moveRight(0.25)
+            break
+    }
+}
+document.addEventListener('keydown', onKeyDown, false)
 
 window.addEventListener('resize', onWindowResize, false)
 function onWindowResize() {
