@@ -30,7 +30,7 @@ dracoLoader.setDecoderPath('/js/libs/draco/')
 const loader = new GLTFLoader()
 loader.setDRACOLoader(dracoLoader)
 loader.load(
-    'models/monkey_compressed.glb',
+    '../dist/client/models/monkey.obj',
     function (gltf) {
         gltf.scene.traverse(function (child) {
             if ((child as THREE.Mesh).isMesh) {
