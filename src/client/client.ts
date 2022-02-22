@@ -6,9 +6,9 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
 
-// const light = new THREE.SpotLight()
-// light.position.set(5, 5, 5)
-// scene.add(light)
+const light = new THREE.SpotLight()
+light.position.set(5, 5, 5)
+scene.add(light)
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -20,8 +20,8 @@ camera.position.z = 2
 
 const renderer = new THREE.WebGLRenderer()
 renderer.physicallyCorrectLights = true
-// renderer.shadowMap.enabled = true
-// renderer.outputEncoding = THREE.sRGBEncoding
+renderer.shadowMap.enabled = true
+renderer.outputEncoding = THREE.sRGBEncoding
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
@@ -32,20 +32,20 @@ const loader = new GLTFLoader()
 loader.load(
     'models/monkey.glb',
     function (gltf) {
-        // gltf.scene.traverse(function (child) {
-        //     if ((child as THREE.Mesh).isMesh) {
-        //         const m = (child as THREE.Mesh)
-        //         m.receiveShadow = true
-        //         m.castShadow = true
-        //     }
-        //     if (((child as THREE.Light)).isLight) {
-        //         const l = (child as THREE.Light)
-        //         l.castShadow = true
-        //         l.shadow.bias = -.003
-        //         l.shadow.mapSize.width = 2048
-        //         l.shadow.mapSize.height = 2048
-        //     }
-        // })
+        gltf.scene.traverse(function (child) {
+            if ((child as THREE.Mesh).isMesh) {
+                const m = (child as THREE.Mesh)
+                m.receiveShadow = true
+                m.castShadow = true
+            }
+            if (((child as THREE.Light)).isLight) {
+                const l = (child as THREE.Light)
+                l.castShadow = true
+                l.shadow.bias = -.003
+                l.shadow.mapSize.width = 2048
+                l.shadow.mapSize.height = 2048
+            }
+        })
         scene.add(gltf.scene)
     },
     (xhr) => {
