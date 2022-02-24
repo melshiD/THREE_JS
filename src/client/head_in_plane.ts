@@ -88,7 +88,7 @@ for (let i = 0; i < 100; i++) {
 const materialForHead = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
 const objLoader = new OBJLoader()
 objLoader.load(
-    'models/web_head_smaller_2.obj',
+    'models/head_blender.obj',
     (object) => {
         (object.children[0] as THREE.Mesh).material = materialForHead
         object.traverse(function (child) {
