@@ -9,8 +9,8 @@ const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
 
 const light = new THREE.PointLight()
-light.lookAt(new THREE.Vector3(0, 1, 0))
-light.position.set(5, 5, 5)
+light.lookAt(new THREE.Vector3(0, 0, 0))
+light.position.set(50,50,50)
 scene.add(light)
 
 const camera = new THREE.PerspectiveCamera(
