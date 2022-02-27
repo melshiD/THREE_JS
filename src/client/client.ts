@@ -8,10 +8,12 @@ let loadedObject = null;
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
 
-const light = new THREE.PointLight()
+const light = new THREE.PointLight(0x39ff15)
 light.lookAt(new THREE.Vector3(0, 0, 0))
 light.position.set(50,50,50)
 scene.add(light)
+
+    WHEN YOU SIT BACK DOWN, FIGURE OUT HOW TO MOVE HEAD ON AXIS
 
 const camera = new THREE.PerspectiveCamera(
     75,
