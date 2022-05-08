@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'dat.gui'
+import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
@@ -27,7 +28,9 @@ camera.position.z = 200;
 camera.position.x = 100;
 camera.position.y = 10;
 const gui = new GUI();
-gui.add(camera.position, "x", 0, 100);
+gui.add(camera.position, "x", 0, 1000);
+gui.add(camera.position, "y", 0, 1000);
+gui.add(camera.position, "z", 0, 1000);
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
