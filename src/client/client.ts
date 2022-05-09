@@ -11,6 +11,10 @@ scene.add(new THREE.AxesHelper(5))
 const light = new THREE.PointLight()
 light.position.set(2.5, 7.5, 15)
 scene.add(light)
+const lightGui = new GUI();
+lightGui.add(light.position, 'x', 0.1, 100);
+lightGui.add(light.position, 'y', 0.1, 100);
+lightGui.add(light.position, 'z', 0.1, 100);
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -24,13 +28,15 @@ const camera = new THREE.PerspectiveCamera(
 //     0.1,
 //     1000
 // )
-camera.position.z = 200;
+
+camera.position.z = 74;
 camera.position.x = 100;
 camera.position.y = 10;
-const gui = new GUI();
-gui.add(camera.position, "x", 0, 1000);
-gui.add(camera.position, "y", 0, 1000);
-gui.add(camera.position, "z", 0, 1000);
+const cameraGui = new GUI();
+cameraGui.add(camera.position, "x", 0, 1000);
+cameraGui.add(camera.position, "y", 0, 1000);
+cameraGui.add(camera.position, "z", 0, 1000);
+camera.filmOffset = 0.2;
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
