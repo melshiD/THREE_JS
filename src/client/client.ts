@@ -36,7 +36,6 @@ const cameraGui = new GUI();
 cameraGui.add(camera.position, "x", 0, 1000);
 cameraGui.add(camera.position, "y", 0, 1000);
 cameraGui.add(camera.position, "z", 0, 1000);
-camera.filmOffset = 0.2;
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -47,17 +46,27 @@ controls.enableDamping = true
 
 const material = new THREE.MeshPhongMaterial({ color: 0x00ff00})
 
+
+let myHead;
 const objLoader = new OBJLoader()
 objLoader.load(
     'models/head_blender.obj',
     (object) => {
-        (object.children[0] as THREE.Mesh).material = material
-        object.traverse(function (child) {
+        myHead = object;
+        (myHead.children[0] as THREE.Mesh).material = material
+        myHead.traverse(function (child) {
             if ((child as THREE.Mesh).isMesh) {
                 (child as THREE.Mesh).material = material
             }
         })
         scene.add(object)
+        // (object.children[0] as THREE.Mesh).material = material
+        // object.traverse(function (child) {
+        //     if ((child as THREE.Mesh).isMesh) {
+        //         (child as THREE.Mesh).material = material
+        //     }
+        // })
+        // scene.add(object)
     },
     (xhr) => {
         console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
@@ -79,12 +88,14 @@ const stats = Stats()
 document.body.appendChild(stats.dom)
 
 function animate() {
+    //culp 3
+    if (myHead !== undefined) { 
+        myHead.scale.set (0.2,0.2,0.2);
+    }
+    //end culp 3
     requestAnimationFrame(animate)
-
     controls.update()
-
     render()
-
     stats.update()
 }
 
