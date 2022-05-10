@@ -59,7 +59,7 @@ objLoader.load(
                 (child as THREE.Mesh).material = material
             }
         })
-        scene.add(object)
+        scene.add(myHead as THREE.Group)
         // (object.children[0] as THREE.Mesh).material = material
         // object.traverse(function (child) {
         //     if ((child as THREE.Mesh).isMesh) {
@@ -89,8 +89,8 @@ document.body.appendChild(stats.dom)
 
 function animate() {
     //culp 3
-    if (myHead !== undefined) { 
-        myHead.scale.set (0.2,0.2,0.2);
+    if ((myHead as THREE.Mesh) !== undefined) { 
+        (myHead as THREE.Mesh).scale.set (0.2,0.2,0.2);
     }
     //end culp 3
     requestAnimationFrame(animate)
