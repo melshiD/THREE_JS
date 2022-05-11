@@ -1,72 +1,65 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'dat.gui'
-import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(5))
 
-const light = new THREE.PointLight()
-light.position.set(2.5, 7.5, 15)
-scene.add(light)
+const light = new THREE.SpotLight();
+light.position.set(100, 100, 100)
+scene.add(light);
 const lightGui = new GUI();
-lightGui.add(light.position, 'x', 0.1, 100);
-lightGui.add(light.position, 'y', 0.1, 100);
-lightGui.add(light.position, 'z', 0.1, 100);
+lightGui.add(light.position, 'x', 0.1, 1000);
+lightGui.add(light.position, 'y', 0.1, 1000);
+lightGui.add(light.position, 'z', 0.1, 1000);
+
+const light2 = new THREE.PointLight()
+light2.position.set(49,  8, 77)
+scene.add(light2)
+const lightGui2 = new GUI();
+lightGui2.add(light2.position, 'x', 0.1, 1000);
+lightGui2.add(light2.position, 'y', 0.1, 1000);
+lightGui2.add(light2.position, 'z', 0.1, 1000);
 
 const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
-    .1,
+    0.1,
     1000
 )
-// const camera = new THREE.PerspectiveCamera(
-//     75,
-//     window.innerWidth / window.innerHeight,
-//     0.1,
-//     1000
-// )
-
-camera.position.z = 74;
-camera.position.x = 100;
-camera.position.y = 10;
-const cameraGui = new GUI();
-cameraGui.add(camera.position, "x", 0, 1000);
-cameraGui.add(camera.position, "y", 0, 1000);
-cameraGui.add(camera.position, "z", 0, 1000);
+camera.position.z = 2;
 
 const renderer = new THREE.WebGLRenderer()
+renderer.physicallyCorrectLights = true
+renderer.shadowMap.enabled = true
+renderer.outputEncoding = THREE.sRGBEncoding
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 
-const material = new THREE.MeshPhongMaterial({ color: 0x00ff00})
-
-
-let myHead;
-const objLoader = new OBJLoader()
-objLoader.load(
-    'models/head_blender.obj',
-    (object) => {
-        myHead = object;
-        (myHead.children[0] as THREE.Mesh).material = material
-        myHead.traverse(function (child) {
+const loader = new GLTFLoader()
+loader.load(
+    'models/Head_Sculpt_1.gltf',
+    function (gltf) {
+        gltf.scene.traverse(function (child) {
             if ((child as THREE.Mesh).isMesh) {
-                (child as THREE.Mesh).material = material
+                const m = child as THREE.Mesh
+                m.receiveShadow = true
+                m.castShadow = true
+            }
+            if ((child as THREE.Light).isLight) {
+                const l = child as THREE.Light
+                l.castShadow = true
+                l.shadow.bias = -0.003
+                l.shadow.mapSize.width = 2048
+                l.shadow.mapSize.height = 2048
             }
         })
-        scene.add(myHead as THREE.Group)
-        // (object.children[0] as THREE.Mesh).material = material
-        // object.traverse(function (child) {
-        //     if ((child as THREE.Mesh).isMesh) {
-        //         (child as THREE.Mesh).material = material
-        //     }
-        // })
-        // scene.add(object)
+        scene.add(gltf.scene)
     },
     (xhr) => {
         console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
@@ -88,14 +81,12 @@ const stats = Stats()
 document.body.appendChild(stats.dom)
 
 function animate() {
-    //culp 3
-    if ((myHead as THREE.Mesh) !== undefined) { 
-        (myHead as THREE.Mesh).scale.set (0.2,0.2,0.2);
-    }
-    //end culp 3
     requestAnimationFrame(animate)
+
     controls.update()
+
     render()
+
     stats.update()
 }
 
